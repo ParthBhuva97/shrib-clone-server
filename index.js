@@ -12,13 +12,20 @@ app.get("/",(req,res)=>{
     res.send("Hello World!")
 })
 
-// app.get("/:id",(req,res)=>{
-//     fs.readFile(`textFiles/${req.params.id}.txt`,(err,data)=>{
-//         if(err) throw err;
-//         res.send(data);
-//     })
-//     // res.send(req.params.id);
-// })
+app.get("/:id",(req,res)=>{
+    axios.get(`https://api.github.com/repos/ParthBhuva97/shribCloneContents/contents/${req.params.id}.txt`,{
+            headers: {
+                "Authorization" : `Bearer ${process.env.GITHUB_PAT}`,
+                "Accept" : "application/vnd.github+json",
+                "X-GitHub-Api-Version" : "2022-11-28"
+            }
+        }).then((response)=>{
+            res.send(response.data.content);
+        }).catch((err)=>{
+            res.send("");
+        })
+    // res.send(req.params.id);
+})
 
 app.post("/:id",(req,res)=>{
     const {textContent} = req.body;
@@ -29,9 +36,9 @@ app.post("/:id",(req,res)=>{
                 "Accept" : "application/vnd.github+json",
                 "X-GitHub-Api-Version" : "2022-11-28"
             }
-        }).then((res)=>{
+        }).then((response)=>{
             // console.log(res.data.sha);
-            res.send(addOrUpdateFile("UPDATE",req.params.id,btoa(textContent),res.data.sha));
+            res.send(addOrUpdateFile("UPDATE",req.params.id,btoa(textContent),response.data.sha));
     }).catch((err)=>{
         res.send(addOrUpdateFile("ADD",req.params.id,btoa(textContent)));
         // console.log(err.response.data.message);
